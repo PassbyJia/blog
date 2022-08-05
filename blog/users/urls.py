@@ -1,7 +1,7 @@
 #进行users 子应用的视图路由
 from django.urls import path
-from users.views import RegisterView,ImageCodeView,SmsCodeView,LoginView,LogoutView
-
+from users.views import LoginView,LogoutView,ForgetPasswordView
+from users.views import RegisterView,ImageCodeView,SmsCodeView
 
 urlpatterns = [
     # path的第一个参数：路由
@@ -19,4 +19,7 @@ urlpatterns = [
 
     #退出登录
     path('logout/',LogoutView.as_view(),name='logout'),
+
+    #忘记密码
+    path('forgetpassword/',ForgetPasswordView.as_view(),name='forgetpassword'),
 ]

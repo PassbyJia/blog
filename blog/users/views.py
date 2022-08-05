@@ -260,3 +260,10 @@ class LogoutView(View):
         response.delete_cookie('is_login')
         # 3.跳转到首页
         return response
+
+#忘记密码
+class ForgetPasswordView(View):
+
+    def get(self,request):
+
+        return render(request,'forget_password.html')
