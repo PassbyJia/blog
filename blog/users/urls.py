@@ -2,7 +2,7 @@
 from django.urls import path
 from users.views import LoginView,LogoutView,ForgetPasswordView
 from users.views import RegisterView,ImageCodeView,SmsCodeView
-from users.views import UserCenterView,WriteBlogView
+from users.views import UserCenterView,WriteBlogView,ArticleManageView
 
 urlpatterns = [
     # path的第一个参数：路由
@@ -29,5 +29,8 @@ urlpatterns = [
 
     #写博客的路由
     path('writeblog/',WriteBlogView.as_view(),name='writeblog'),
+
+    #博文管理的路由
+    path('articlemanage/',ArticleManageView.as_view(),name='articlemanage')
 
 ]

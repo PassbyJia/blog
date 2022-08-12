@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views import View
 
 #注册视图
-from django.http.response import HttpResponseBadRequest
+from django.http.response import HttpResponseBadRequest, HttpResponseNotFound
 import re
 from users.models import User
 from django.db import DatabaseError
@@ -448,3 +448,40 @@ class WriteBlogView(LoginRequiredMixin,View):
             return HttpResponseBadRequest('发布失败，请稍后再试')
         # 4.跳转到指定页面（暂时首页）
         return redirect(reverse('home:index'))
+
+#博文管理的视图
+class ArticleManageView(LoginRequiredMixin,View):
+    def get(self,request):
+        """
+        1.获取用户所有的博文信息
+        2.获取分页参数
+        3.创建分页器
+        4.进行分页处理
+        5.组织数据传递给模板
+        :param request:
+        :return:
+        """
+        # 1.获取用户所有的博文信息
+        user = request.user
+        articles=Article.objects.filter(author_id=user.id)
+        # 2.获取分页参数
+        page_num = request.GET.get('page_num', 1)
+        page_size = request.GET.get('page_size', 10)
+        # 3.创建分页器
+        from django.core.paginator import Paginator, EmptyPage
+        paginator = Paginator(articles, per_page=page_size)
+        # 4.进行分页处理
+        try:
+            page_acticles=paginator.page(page_num)
+        except EmptyPage:
+            return HttpResponseNotFound('empty page')
+        # 获取总页数
+        total_page = paginator.num_pages
+        # 5.组织数据传递给模板
+        context = {
+            'articles': page_acticles,
+            'page_size': page_size,
+            'total_page': total_page,
+            'page_num': page_num
+        }
+        return render(request,'article_manage.html',context=context)
