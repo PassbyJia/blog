@@ -440,7 +440,8 @@ class WriteBlogView(LoginRequiredMixin,View):
                 category=category,
                 tags=tags,
                 sumary=sumary,
-                content=content
+                content=content,
+                title=title
             )
         except Exception as e:
             logger.error(e)
