@@ -79,7 +79,7 @@ class Comment(models.Model):
     评论的时间
     """
     # 评论内容
-    content=models.TextField
+    content=models.TextField()
     # 评论的文章
     article=models.ForeignKey(Article,on_delete=models.SET_NULL,null=True)
     # 评论的用户
