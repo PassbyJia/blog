@@ -450,6 +450,7 @@ class WriteBlogView(LoginRequiredMixin,View):
         return redirect(reverse('home:index'))
 
 #博文管理的视图
+from home.models import Comment
 class ArticleManageView(LoginRequiredMixin,View):
     def get(self,request):
         """
@@ -485,3 +486,53 @@ class ArticleManageView(LoginRequiredMixin,View):
             'page_num': page_num
         }
         return render(request,'article_manage.html',context=context)
+
+    def post(self,request):
+        """
+        1.接受博文的 id
+        2.验证是否存在该文章
+        3.获得操作值 flag
+            3.1 ‘1’：浏览该文章
+                3.1.1 根据文章id跳转到detail页面
+            3.2 ‘2’：编辑该文章
+                3.2.1 根据文章id获取文章具体信息
+                3.2.2 跳转文章编辑页面，并将文章具体信息传给网页
+            3.3 ‘3’：删除该文章
+                3.3.1 删除该文章以及相关的评论
+                3.3.2 返回原页面
+        :param request:
+        :return:
+        """
+        # 1.接受博文的 id
+        id = request.POST.get('id')
+        # 2.验证是否存在该文章
+        try:
+            article = Article.objects.get(id=id)
+        except Article.DoesNotExist:
+            return HttpResponseBadRequest('没有此文章')
+        # 3.获得操作值 flag
+        flag=request.POST.get('flag')
+        #     3.1 ‘1’：浏览该文章
+        if flag == '1':
+        #         3.1.1 根据文章id跳转到detail页面
+            return redirect('/detail/?&id='+id)
+        #     3.2 ‘2’：编辑该文章
+        elif flag == '2':
+        #         3.2.1 根据文章id获取文章具体信息
+        #         3.2.2 跳转文章编辑页面，并将文章具体信息传给网页
+            return render(request,'center.html',)
+        #     3.3 ‘3’：删除该文章
+        else:
+        #         3.3.1 删除该文章以及相关的评论
+            try:
+                #查询是否有评论
+                comment=Comment.objects.filter(article_id=id)
+                if comment.exists():#有评论就删除
+                    comment.delete()
+                #删除评论再删除文章
+                article.delete()
+            except Exception:
+                return HttpResponseBadRequest('删除失败')
+        #         3.3.2 返回原页面
+            return redirect(reverse('users:articlemanage'))
+

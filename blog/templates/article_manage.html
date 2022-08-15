@@ -35,7 +35,7 @@
             <li class="nav-item dropdown" v-if="is_login">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" @click="show_menu_click">[[username]]</a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown" style="display: block" v-show="show_menu">
-                    <a class="dropdown-item" href="write_blog.html">写文章</a>
+                    <a class="dropdown-item" href="{% url 'users:writeblog' %}">写文章</a>
                     <a class="dropdown-item" href='{% url 'users:center' %}'>个人信息</a>
                     <a class="dropdown-item" href='{% url 'users:articlemanage' %}'>博文管理</a>
                     <a class="dropdown-item" href='{% url 'users:logout' %}'>退出登录</a>
@@ -75,8 +75,16 @@
                         <td>{{ article.created|date }}</td>
                         <td>{{ article.updated|date }}</td>
                         <td>
-                            <button>修改</button>
-                            <button>删除</button>
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <!-- 传回文章id-->
+                                <input type="hidden" value="{{ article.id }}" id="id" name="id">
+                                <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                                    <button type="submit" class="btn btn-success" name="flag" value="1">浏览</button>
+                                    <button type="submit" class="btn btn-warning" name="flag" value="2">修改</button>
+                                    <button type="submit" class="btn btn-danger" name="flag" value="3">删除</button>
+                                </div>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
