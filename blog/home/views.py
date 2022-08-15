@@ -21,7 +21,7 @@ class IndexView(View):
         # 1.获取所有分类信息
         categories=ArticleCategory.objects.all()
         # 2.接受用户点击的分类id
-        cat_id = request.GET.get('cat_id',1)
+        cat_id = request.GET.get('cat_id',8)
         # 3.根据分类id进行分类的查询
         try:
             category=ArticleCategory.objects.get(id=cat_id)

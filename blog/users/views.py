@@ -510,6 +510,7 @@ class ArticleManageView(LoginRequiredMixin,View):
             article = Article.objects.get(id=id)
         except Article.DoesNotExist:
             return HttpResponseBadRequest('没有此文章')
+
         # 3.获得操作值 flag
         flag=request.POST.get('flag')
         #     3.1 ‘1’：浏览该文章
@@ -518,9 +519,8 @@ class ArticleManageView(LoginRequiredMixin,View):
             return redirect('/detail/?&id='+id)
         #     3.2 ‘2’：编辑该文章
         elif flag == '2':
-        #         3.2.1 根据文章id获取文章具体信息
-        #         3.2.2 跳转文章编辑页面，并将文章具体信息传给网页
-            return render(request,'center.html',)
+        #         3.2.1 跳转文章编辑页面并传入博文id
+            return redirect('/updateblog/?&id='+id)
         #     3.3 ‘3’：删除该文章
         else:
         #         3.3.1 删除该文章以及相关的评论
@@ -535,4 +535,82 @@ class ArticleManageView(LoginRequiredMixin,View):
                 return HttpResponseBadRequest('删除失败')
         #         3.3.2 返回原页面
             return redirect(reverse('users:articlemanage'))
+
+#修改博文的视图
+class UpdateBlogView(LoginRequiredMixin,View):
+
+    def get(self,request):
+        """
+        1.获取博文 id
+        2.验证文章是否存在
+        3.组织文章数据对页面进行渲染
+        4.进入渲染后的编辑页面
+        :param request:
+        :return:
+        """
+        # 1.获取博文 id
+        id = request.GET.get('id')
+        # 2.验证文章是否存在
+        try:
+            article = Article.objects.get(id=id)
+        except Article.DoesNotExist:
+            return HttpResponseBadRequest('没有此文章')
+        # 3.组织文章数据对页面进行渲染
+        context = {
+            'article_id': article.id,
+            'old_title': article.title,
+            'old_category': article.category_id,
+            'old_tags': article.tags,
+            'old_sumary': article.sumary,
+            'old_content': article.content,
+            'categories': ArticleCategory.objects.all()
+        }
+        # 4.进入渲染后的编辑页面
+        return render(request,'update_blog.html',context=context)
+
+    def post(self,request):
+        """
+        1.接受数据
+        2.验证数据
+        3.数据入库
+        4.跳转到博文管理页面
+        :param request:
+        :return:
+        """
+        # 1.接受数据
+        id=request.POST.get('id')
+        avatar=request.FILES.get('avatar')
+        title = request.POST.get('title')
+        category_id = request.POST.get('category')
+        tags = request.POST.get('tags')
+        sumary = request.POST.get('sumary')
+        content = request.POST.get('content')
+        #得到文章对象
+        article = Article.objects.get(id=id)
+        # 2.验证数据
+        # 2.1 验证参数是否齐全
+        if not all([title,category_id,sumary,content]):
+            return HttpResponseBadRequest('参数不全')
+        # 2.2 判断分类id
+        try:
+            category=ArticleCategory.objects.get(id=category_id)
+        except ArticleCategory.DoesNotExist:
+            return HttpResponseBadRequest('没有此分类')
+        # 2.3 如果头像为空则代表无需更换头像
+        if avatar is None:
+            avatar = article.avatar
+        # 3.数据更新
+        try:
+            article.avatar=avatar
+            article.category=category
+            article.tags=tags
+            article.sumary=sumary
+            article.content=content
+            article.title=title
+            article.save()
+        except Exception as e:
+            logger.error(e)
+            return HttpResponseBadRequest('更新失败，请稍后再试')
+        # 4.跳转到博文管理
+        return redirect(reverse('users:articlemanage'))
 
